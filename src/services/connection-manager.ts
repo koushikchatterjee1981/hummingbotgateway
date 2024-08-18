@@ -46,7 +46,11 @@ import { XRPLCLOB } from '../connectors/xrpl/xrpl';
 import { QuipuSwap } from '../connectors/quipuswap/quipuswap';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
 import { Balancer } from '../connectors/balancer/balancer';
-
+import { MinSwap } from '../connectors/minswap/minswap';
+import { Sundaeswap } from '../connectors/sundaeswap/sundaeswap';
+ 
+import {logger} from './logger'
+ 
 export type ChainUnion =
   | Algorand
   | Cosmos
@@ -57,7 +61,7 @@ export type ChainUnion =
   | XRPLish
   | Kujira
   | Osmosis;
-
+ 
 export type Chain<T> = T extends Algorand
   ? Algorand
   : T extends Cosmos
@@ -77,7 +81,7 @@ export type Chain<T> = T extends Algorand
                 : T extends Osmosis
                   ? Osmosis
                   : never;
-
+ 
 export class UnsupportedChainException extends Error {
   constructor(message?: string) {
     message =
@@ -89,30 +93,30 @@ export class UnsupportedChainException extends Error {
     this.stack = (<any>new Error()).stack;
   }
 }
-
+ 
 export async function getInitializedChain<T>(
   chain: string,
   network: string,
 ): Promise<Chain<T>> {
   const chainInstance = await getChainInstance(chain, network);
-
+ 
   if (chainInstance === undefined) {
     throw new UnsupportedChainException(`unsupported chain ${chain}`);
   }
-
+ 
   if (!chainInstance.ready()) {
     await chainInstance.init();
   }
-
+ 
   return chainInstance as Chain<T>;
 }
-
+ 
 export async function getChainInstance(
   chain: string,
   network: string,
 ): Promise<ChainUnion | undefined> {
   let connection: ChainUnion | undefined;
-
+  
   if (chain === 'algorand') {
     connection = Algorand.getInstance(network);
   } else if (chain === 'ethereum') {
@@ -144,10 +148,10 @@ export async function getChainInstance(
   } else {
     connection = undefined;
   }
-
+ 
   return connection;
 }
-
+ 
 export type ConnectorUnion =
   | Uniswapish
   | UniswapLPish
@@ -159,8 +163,10 @@ export type ConnectorUnion =
   | XRPLCLOB
   | Curve
   | KujiraCLOB
-  | QuipuSwap;
-
+  | QuipuSwap
+  | MinSwap
+  | Sundaeswap;
+ 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
   : T extends UniswapLPish
@@ -181,8 +187,12 @@ export type Connector<T> = T extends Uniswapish
                   ? KujiraCLOB
                   : T extends QuipuSwap
                     ? QuipuSwap
+                    : T extends MinSwap
+                    ? MinSwap
+                    : T extends Sundaeswap
+                    ? Sundaeswap
                     : never;
-
+ 
 export async function getConnector<T>(
   chain: string,
   network: string,
@@ -190,7 +200,7 @@ export async function getConnector<T>(
   address?: string,
 ): Promise<Connector<T>> {
   let connectorInstance: ConnectorUnion;
-
+  logger.info('chain---',chain,'network---',network)
   if (
     (chain === 'ethereum' || chain === 'polygon') &&
     connector === 'uniswap'
@@ -255,13 +265,18 @@ export async function getConnector<T>(
     connectorInstance = QuipuSwap.getInstance(network);
   } else if (chain === 'ethereum' && connector === 'carbonamm') {
     connectorInstance = Carbonamm.getInstance(chain, network);
-  } else {
+  } else if (chain === 'cardano' && connector === 'minSwap') {
+    connectorInstance = MinSwap.getInstance(network);
+  }else if (chain === 'cardano' && connector === 'sundaeswap') {
+    connectorInstance = Sundaeswap.getInstance(network);
+  }
+  else {
     throw new Error('unsupported chain or connector');
   }
-
+ 
   if (!connectorInstance.ready()) {
     await connectorInstance.init();
   }
-
+ 
   return connectorInstance as Connector<T>;
 }
