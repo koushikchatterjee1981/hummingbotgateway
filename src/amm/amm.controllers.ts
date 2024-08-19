@@ -102,17 +102,19 @@ import {
   trade as sundaeswapTrade,
 } from '../connectors/sundaeswap/sundaeswap.controllers';
 
+import { Cardano } from '../chains/cardano/cardano';
+
 export async function price(req: PriceRequest): Promise<PriceResponse> {
-  try{
+  
   const chain = await getInitializedChain<
-    Algorand | Ethereumish | Nearish | Tezosish | Osmosis
+    Algorand | Ethereumish | Nearish | Tezosish | Osmosis | Cardano
   >(req.chain, req.network);
   if (chain instanceof Osmosis){
     return chain.controller.price(chain as unknown as Osmosis, req);
   }
-}catch(error){
-console.log("For cardano chain instance not found");
-}
+
+  
+
   const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap =
     await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap>(
       req.chain,

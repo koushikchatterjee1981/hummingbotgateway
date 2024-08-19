@@ -50,7 +50,8 @@ import { MinSwap } from '../connectors/minswap/minswap';
 import { Sundaeswap } from '../connectors/sundaeswap/sundaeswap';
  
 import {logger} from './logger'
- 
+import { Cardano } from '../chains/cardano/cardano';
+
 export type ChainUnion =
   | Algorand
   | Cosmos
@@ -60,7 +61,8 @@ export type ChainUnion =
   | Tezosish
   | XRPLish
   | Kujira
-  | Osmosis;
+  | Osmosis
+  | Cardano;
  
 export type Chain<T> = T extends Algorand
   ? Algorand
@@ -80,6 +82,8 @@ export type Chain<T> = T extends Algorand
                 ? KujiraCLOB
                 : T extends Osmosis
                   ? Osmosis
+                  : T extends Cardano
+                  ? Cardano
                   : never;
  
 export class UnsupportedChainException extends Error {
@@ -145,7 +149,10 @@ export async function getChainInstance(
     connection = XRPL.getInstance(network);
   } else if (chain === 'kujira') {
     connection = Kujira.getInstance(network);
-  } else {
+ 
+  } else if (chain === 'cardano') {
+    connection = Cardano.getInstance(network);
+  } else { 
     connection = undefined;
   }
  
