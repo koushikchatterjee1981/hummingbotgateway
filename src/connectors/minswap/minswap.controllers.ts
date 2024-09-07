@@ -1,4 +1,4 @@
-//import { Ethereumish } from "../../services/common-interfaces";
+//import { Cardanoish } from "../../services/common-interfaces";
 import { MinSwap } from './minswap';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 //import { AvailableNetworks } from '../../services/config-manager-types';
@@ -21,7 +21,9 @@ import {
   calculateDeposit,
   BlockfrostAdapter,
   calculateSwapExactIn,
+  calculateSwapExactOut,
   Dex,
+  DexV2,
   NetworkId,
   PoolV1,
 } from '@minswap/sdk';
@@ -52,8 +54,18 @@ interface InitialResponse {
     lucid:Lucid
 };
 
+interface InitialPriceResponse {
+  network:Network
+  ttl:string,
+  slippage:string,
+  blockfrostUrl:string,
+  blockfrostProjectId:string,
+  poolId:string,
+  blockfrostAdapterInstance:BlockfrostAdapter
+};
 
-async function initializePrice(req: PriceRequest): Promise<InitialResponse>{
+
+async function initializePrice(req: PriceRequest): Promise<InitialPriceResponse>{
   const reqNetwork = req.network;
   //let blockAdapternetwork = "preprod";
   let network: Network = "Preprod";
@@ -68,20 +80,13 @@ async function initializePrice(req: PriceRequest): Promise<InitialResponse>{
   const blockfrostUrl = ConfigManagerV2.getInstance().get(`cardano.contractAddresses.${reqNetwork}.apiurl`);
   const blockfrostProjectId = ConfigManagerV2.getInstance().get("cardano.blockfrostProjectId");
   
+  
   let poolId = ConfigManagerV2.getInstance().get("cardano.defaultPoolId");
   if(req.poolId){
     poolId= req.poolId;
   }
   
-  ;//'preprodfGRaDPrVu6DhhHSNm5w8kzIkQghi2RYR';
-  //const blockfrostUrl = 'https://cardano-preprod.blockfrost.io/api/v0';
- /* const address =
-    'addr1qxw0m0mcyvpnkq3atvxm5l9w3uzwt7pqh0djakcqypknt5xum2ypkuc5snqju55m8mkjywxlwrt2v5e6yvcsymjxuxxs5d4gqc';
-  const poolId =req.poolId;
-    //'3bb0079303c57812462dec9de8fb867cef8fd3768de7f12c77f6f0dd80381d0d';*/
-  
-
-  
+  ;
   let blockfrostAdapterInstance = new BlockfrostAdapter({
     networkId: networkId,//NetworkId.TESTNET,
     blockFrost: new BlockFrostAPI({
@@ -100,15 +105,14 @@ async function initializePrice(req: PriceRequest): Promise<InitialResponse>{
     });
   }
 
-  let address = ConfigManagerV2.getInstance().get("cardano.defaultAddress");
+  //let address = ConfigManagerV2.getInstance().get("cardano.defaultAddress");
 
-  
-  const lucid = await getBackendLucidInstance(
+  /*const lucid = await getBackendLucidInstance(
     network,
     blockfrostProjectId,
     blockfrostUrl,
     address,
-  );
+  );*/
 
   return{
     network,
@@ -117,42 +121,31 @@ async function initializePrice(req: PriceRequest): Promise<InitialResponse>{
     blockfrostUrl,
     blockfrostProjectId,
     poolId,
-    blockfrostAdapterInstance,
-    address,
-    lucid
+    blockfrostAdapterInstance
+    
+    
   };
 }
 
 
 async function initializeTrade(req: TradeRequest): Promise<InitialResponse>{
   const reqNetwork = req.network;
-  //let blockAdapternetwork = "preprod";
   let network: Network = "Preprod";
   let networkId=0;
   if(reqNetwork=="mainnet"){
     networkId=1;
     network="Mainnet";
-    //blockAdapternetwork="mainnet";
   }
   const ttl =  ConfigManagerV2.getInstance().get("cardano.ttl");
   const slippage = ConfigManagerV2.getInstance().get("cardano.allowedSlippage"); 
   const blockfrostUrl = ConfigManagerV2.getInstance().get(`cardano.contractAddresses.${reqNetwork}.apiurl`);
   const blockfrostProjectId = ConfigManagerV2.getInstance().get("cardano.blockfrostProjectId");
   
-  let poolId = ConfigManagerV2.getInstance().get("cardano.defaultPoolId");
+  let poolId = ConfigManagerV2.getInstance().get(`cardano.defaultPoolId.${reqNetwork}.poolId`);
   if(req.poolId){
     poolId= req.poolId;
-  }
-  
-  ;//'preprodfGRaDPrVu6DhhHSNm5w8kzIkQghi2RYR';
-  //const blockfrostUrl = 'https://cardano-preprod.blockfrost.io/api/v0';
- /* const address =
-    'addr1qxw0m0mcyvpnkq3atvxm5l9w3uzwt7pqh0djakcqypknt5xum2ypkuc5snqju55m8mkjywxlwrt2v5e6yvcsymjxuxxs5d4gqc';
-  const poolId =req.poolId;
-    //'3bb0079303c57812462dec9de8fb867cef8fd3768de7f12c77f6f0dd80381d0d';*/
-  
-
-  
+  }  
+  ;
   let blockfrostAdapterInstance = new BlockfrostAdapter({
     networkId: networkId,//NetworkId.TESTNET,
     blockFrost: new BlockFrostAPI({
@@ -172,13 +165,17 @@ async function initializeTrade(req: TradeRequest): Promise<InitialResponse>{
   }
 
   let address = req.address;
-
+ let seedphrase = "";
+ if(req.seedPhrase){
+  seedphrase = req.seedPhrase;
+ }
   
   const lucid = await getBackendLucidInstance(
     network,
     blockfrostProjectId,
     blockfrostUrl,
-    address,
+    req.address,
+    seedphrase
   );
 
   return{
@@ -192,6 +189,20 @@ async function initializeTrade(req: TradeRequest): Promise<InitialResponse>{
     address,
     lucid
   };
+}
+
+
+async function commitTransaction(txCompleteReq:TxComplete): Promise<string>{
+
+
+  const signedTx = await txCompleteReq.sign().complete();
+   
+     console.log("signedTx:::",signedTx);
+     
+  const txId = await signedTx.submit();
+  // eslint-disable-next-line no-console
+  console.info(`Transaction submitted successfully: ${txId}`);
+  return txId;
 }
 
 export async function price(
@@ -215,17 +226,83 @@ export async function price(
     const api = initialValue.blockfrostAdapterInstance;
 
     const poolidentifier = initialValue.poolId;
-  const returnedPool = await getPoolById(initialValue.network, api, poolidentifier);
+    const returnedPool = await getPoolById(initialValue.network, api, poolidentifier);
 
   
   //console.log("cardano yml found:::", ConfigManagerV2.getInstance().getNamespace("cardano") );
   
  
-console.log("ttl:::::",initialValue.ttl);
+  console.log("ttl:::::",initialValue.ttl);
   console.log(returnedPool.poolState);
 
   const [a, b] = await api.getV1PoolPrice({ pool: returnedPool.poolState });
   console.log(`ADA/MIN price: ${a.toString()}; MIN/ADA price: ${b.toString()}`);
+
+  /** here a is ADA/MIN and b is  MIN/ADA*/
+ // console.log(`with 1 assetA(ADA) I will get assetB(MIN): ${b.toString()};`);
+ // console.log(`with 1 assetB(MIN) I will get assetA(ADA): ${a.toString()};`);
+  let reqType=req.side;
+  let amountToSpend: number = Number(req.amount);
+  let totalValue=0.0;
+  let expectedAmount="";
+  let conversionFactor=0.0;
+
+ //a 0.04010113164210906381
+//b 24.9369521270548956691
+  
+  if(reqType=="BUY"){
+    let wantToBuy = req.base;
+    let willspend = req.quote;
+    console.log(wantToBuy,"----",willspend);
+    /*
+
+    //To BUY 5 base ADA,  calculate amount of quote MIN required
+    quote=MIN
+    base=ADA
+    amount=5
+    */
+
+    if(willspend=="MIN" && wantToBuy=="ADA"){
+      conversionFactor = Number(b);
+    }else if(willspend=="ADA" && wantToBuy=="MIN"){
+      conversionFactor = Number(a);
+      /*
+
+    //To BUY 5 base MIN,  calculate amount of quote ADA required
+    quote=ADA
+    base=MIN
+    amount=5
+    */
+      
+    }
+    
+  }else if(reqType=="SELL"){
+    /*
+    //When I sell 5 base ADA how many quote MIN can I get in return
+    quote=MIN
+    base=ADA
+    amount=5
+    I need to use b.toString as conversion factor
+    */
+   /*
+    //When I sell 5 base MIN how many quote ADA can I get in return
+    quote=ADA
+    base=MIN
+    amount=5
+    I need to use a.toString as conversion factor
+    */
+    let wantToSell = req.base;
+    let tokenReceive = req.quote;
+    if(tokenReceive=="MIN" && wantToSell=="ADA"){
+      conversionFactor = Number(b);
+    }else if(tokenReceive=="ADA" && wantToSell=="MIN"){
+      conversionFactor = Number(a);
+    }
+
+    totalValue = amountToSpend * conversionFactor;
+    expectedAmount = totalValue.toFixed(2).replace('.', '');
+    
+  }
 
   return {
     network: req.network,
@@ -234,11 +311,11 @@ console.log("ttl:::::",initialValue.ttl);
     base: req.base,
     quote: req.quote,
     amount: new Decimal(req.amount).toFixed(2),
-    rawAmount: new Decimal(req.amount).toFixed(2).replace('.', ''),
-    expectedAmount: new Decimal(b.toString()).toFixed(2),
+    rawAmount: expectedAmount,
+    expectedAmount: expectedAmount,
     price: new Decimal(b.toString()).toFixed(2),
     gasPrice: 0,
-    gasPriceToken: "gasPriceToken", 
+    gasPriceToken: "n/a", 
     gasLimit: 0, 
     gasCost:"n/a"
   };
@@ -256,25 +333,48 @@ export async function trade(
     NetworkId,
   );
  
-  const YOUR_PRIVATE_KEY="";
- 
+  
   const initialTradeVal = await initializeTrade(req);
+  const api = initialTradeVal.blockfrostAdapterInstance;
+  let txnHash = "";
 
+if(req.isCancelled && req.txnHash){
+    txnHash = req.txnHash;
+    const txnId = cancelTx(initialTradeVal.lucid, api,txnHash);
+    return {
+      network: req.network,
+      timestamp: startTimestamp,
+      latency: latency(startTimestamp, Date.now()),
+      base: '',
+      quote: '',
+      amount: '',
+      rawAmount: '',
+      expectedIn: '',
+      price: '',
+      gasPrice: 0.0,
+      gasPriceToken: 'n/a',
+      gasLimit: 0,
+      gasCost: '',
+      nonce: Math.random(),
+      txHash: txnId,
+    };
+}
+  
   const utxos = await initialTradeVal.lucid.utxosAt(req.address);
 
-  const api = initialTradeVal.blockfrostAdapterInstance;
 
-  const txComplete = await swapExactInTx(initialTradeVal.network, initialTradeVal.lucid, api, req.address,initialTradeVal.poolId, utxos,req,initialTradeVal);
 
-  console.log('swapTransaction::::', txComplete);
-  
-  const signedTx = await txComplete
-    .signWithPrivateKey(YOUR_PRIVATE_KEY)
-    .complete();
-  const txId = await signedTx.submit();
-  // eslint-disable-next-line no-console
-  console.info(`Transaction submitted successfully: ${txId}`);
+  let txnId=""  ;
+  if(req.side=="SELL"){
+   txnId = await swapExactInTx(initialTradeVal.network, initialTradeVal.lucid, api, initialTradeVal.poolId, utxos,req,initialTradeVal);
 
+  }else if(req.side=="BUY"){
+   txnId = await swapExactOutTx(initialTradeVal.network, initialTradeVal.lucid, api, initialTradeVal.poolId, utxos,req,initialTradeVal);
+
+  }
+   
+
+  console.log('txnid::::', txnId);
   
   return {
     network: req.network,
@@ -286,12 +386,12 @@ export async function trade(
     rawAmount: new Decimal(req.amount).toFixed(2),
     expectedIn: new Decimal(req.amount).toFixed(2),
     price: new Decimal(req.amount).toFixed(2),
-    gasPrice: txComplete.fee,
-    gasPriceToken: '',
+    gasPrice: 0.0,
+    gasPriceToken: 'n/a',
     gasLimit: 0,
     gasCost: '',
     nonce: Math.random(),
-    txHash: txId,
+    txHash: txnId,
   };
 }
 
@@ -333,12 +433,16 @@ export async function removeLiquidity(
       }),
     });
   }
-
+  let seedphrase = "";
+  if(req.seedPhrase){
+    seedphrase=req.seedPhrase;
+  }
   const lucid = await getBackendLucidInstance(
     network,
     blockfrostProjectId,
     blockfrostUrl,
     req.address,
+    seedphrase
   );
 
   console.log('lucid : ', lucid);
@@ -411,11 +515,18 @@ export async function addLiquidity(
     });
   }
 
+  let seedphrase = "";
+  if(req.seedPhrase){
+    seedphrase=req.seedPhrase;
+  }
+  
+
   const lucid = await getBackendLucidInstance(
     network,
     blockfrostProjectId,
     blockfrostUrl,
     req.address,
+    seedphrase
   );
 
   console.log('lucid : ', lucid);
@@ -458,12 +569,15 @@ async function getBackendLucidInstance(
   projectId: string,
   blockfrostUrl: string,
   address: Address,
+  seedPhrase: string
 ): Promise<Lucid> {
   const provider = new Blockfrost(blockfrostUrl, projectId);
   const lucid = await Lucid.new(provider, network);
-  lucid.selectWalletFrom({
+ /* lucid.selectWalletFrom({
     address: address,
-  });
+  });*/
+  console.log("address:::",address);
+  lucid.selectWalletFromSeed(seedPhrase);//in the adrdress field we actually need to get the seed phrase to identify the wallet
   return lucid;
 }
 async function getPoolById(
@@ -495,24 +609,27 @@ async function swapExactInTx(
   network: Network,
   lucid: Lucid,
   blockfrostAdapter: BlockfrostAdapter,
-  address: Address,
   poolId : string,
   availableUtxos: UTxO[],
   req:TradeRequest,
   initialTradeVal:InitialResponse,
-): Promise<TxComplete> {
+): Promise<string> {
   const { poolState, poolDatum } = await getPoolById(
     network,
     blockfrostAdapter,
     poolId,
   );
 
+  /*
+  BUY : acquire particular base by selling quote  calculateSwapExactOut
+SELL : sell particular base to acquire quote  calculateSwapExactIn
+*/
   const swapAmountADA = BigInt(req.amount);
 
   const { amountOut } = calculateSwapExactIn({
-    amountIn: swapAmountADA,
-    reserveIn: poolState.reserveA,
-    reserveOut: poolState.reserveB,
+    amountIn: swapAmountADA,//exact amount of input tokens that the user wants to swap
+    reserveIn: poolState.reserveA,//total amount of the input token currently available in the liquidity pool
+    reserveOut: poolState.reserveB,//total amount of the output token currently available in the liquidity pool
   });
 
   // Because pool is always fluctuating, so you should determine the impact of amount which you will receive
@@ -522,29 +639,29 @@ async function swapExactInTx(
 
   const dex = new Dex(lucid);
 
-  if(req.side=="BUY"){
-    return await dex.buildSwapExactInTx({
-      amountIn: swapAmountADA,
-      assetIn: ADA,
-      assetOut: poolDatum.assetB,
-      minimumAmountOut: acceptedAmount,
-      isLimitOrder: false,
-      sender: address,
-      availableUtxos: availableUtxos,
-    });
-  }else{
-    return await dex.buildSwapExactInTx({
-      amountIn: swapAmountADA,
-      assetIn: poolDatum.assetB,
-      assetOut: ADA,
-      minimumAmountOut: acceptedAmount,
-      isLimitOrder: false,
-      sender: address,
-      availableUtxos: availableUtxos,
-    });
-  }
+  /*return await dex.buildSwapExactInTx({
+    amountIn: swapAmountADA,
+    assetIn: ADA,
+    assetOut: poolDatum.assetB,
+    minimumAmountOut: acceptedAmount,
+    isLimitOrder: false,
+    sender: req.address,
+    availableUtxos: availableUtxos,
+  });*/
+
+  const txComplete = await dex.buildSwapExactInTx({
+    amountIn: swapAmountADA,
+    assetIn: ADA,
+    assetOut: poolDatum.assetB,
+    minimumAmountOut: acceptedAmount,
+    isLimitOrder: false,
+    sender: req.address,
+    availableUtxos: availableUtxos,
+  });
+
+ const transactionId = await commitTransaction(txComplete);
   
-  
+  return transactionId;
 }
 
 async function depositTx(
@@ -647,4 +764,74 @@ async function withdrawTx(
     minimumAssetBReceived: acceptedAmountBReceive,
     availableUtxos: availableUtxos,
   });
+
 }
+
+async function swapExactOutTx(
+  network: Network,
+  lucid: Lucid,
+  blockfrostAdapter: BlockfrostAdapter,
+  poolId : string,
+  availableUtxos: UTxO[],
+  req:TradeRequest,
+  initialTradeVal:InitialResponse,
+): Promise<string> {
+  const { poolState, poolDatum } = await getPoolById(
+    network,
+    blockfrostAdapter,
+    poolId,
+  );
+
+  /*
+  swap MIN to get ADA
+base: ADA , quote : MIN
+
+*/
+  const exactAmountOutADA = BigInt(req.amount);
+
+  const { amountIn } = calculateSwapExactOut({
+    exactAmountOut: exactAmountOutADA,
+    reserveIn: poolState.reserveA,
+    reserveOut: poolState.reserveB,
+  });
+
+
+  // Because pool is always fluctuating, so you should determine the impact of amount which you will receive
+  const slippageTolerance = BigInt(initialTradeVal.slippage);
+  const necessaryAmountIn  =
+    (amountIn * (BigInt(100) - slippageTolerance)) / BigInt(100);
+
+  const dex = new Dex(lucid);
+
+  const txComplete =  await dex.buildSwapExactOutTx({
+    maximumAmountIn: necessaryAmountIn,
+    assetIn: ADA,
+    assetOut: poolDatum.assetB,
+    expectedAmountOut: exactAmountOutADA,
+    sender: req.address,
+    availableUtxos: availableUtxos,
+  });
+
+  const transactionId = await commitTransaction(txComplete);
+  
+  return transactionId;
+  }
+  
+  async function cancelTx(
+    lucid: Lucid,
+    blockFrostAdapter: BlockfrostAdapter,
+    transactionHash : string
+  ): Promise<string> {
+    const txComplete =  new DexV2(lucid, blockFrostAdapter).cancelOrder({
+      orderOutRefs: [
+        {
+          txHash: transactionHash,
+          outputIndex: 0,
+        },
+      ],
+    });
+
+    const transactionId = await commitTransaction(txComplete);
+  
+  return transactionId;
+  }

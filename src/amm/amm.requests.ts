@@ -70,6 +70,9 @@ export interface TradeRequest extends NetworkSelectionRequest {
   maxPriorityFeePerGas?: string;
   allowedSlippage?: string;
   poolId?: string;
+  seedPhrase?: string; //this is to use seedphrase for Cardano
+  isCancelled? : boolean;//to identify cancel txn for cardano
+  txnHash?: string; //this is to cancel txn for Cardano
 }
 
 export interface TradeResponse {
@@ -110,6 +113,7 @@ export interface AddLiquidityRequest extends NetworkSelectionRequest { // now al
   maxPriorityFeePerGas?: string;
   allowedSlippage?: string; // COSMOS: used to calc TokenMinAmount
   poolId?: string;
+  seedPhrase?: string;//used for cardano
 }
 
 export interface AddLiquidityResponse {
@@ -144,6 +148,7 @@ export interface CollectEarnedFeesRequest extends NetworkSelectionRequest {
 export interface RemoveLiquidityRequest extends CollectEarnedFeesRequest {
   decreasePercent?: number;
   allowedSlippage?: string;
+  seedPhrase?: string;//for cardano
 }
 
 export interface RemoveLiquidityResponse {
