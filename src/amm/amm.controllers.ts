@@ -81,6 +81,7 @@ import {
   Tezosish,
   Uniswapish,
   UniswapLPish,
+  Cardanoish,
 } from '../services/common-interfaces';
 import { Algorand } from '../chains/algorand/algorand';
 import { Tinyman } from '../connectors/tinyman/tinyman';
@@ -88,17 +89,27 @@ import { Plenty } from '../connectors/plenty/plenty';
 import { QuipuSwap } from '../connectors/quipuswap/quipuswap';
 import { Osmosis } from '../chains/osmosis/osmosis';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
+import {MinSwap} from '../connectors/minswap/minswap';
+import {
+  price as minswapPrice,
 
+} from '../connectors/minswap/minswap.controllers';
+import {Sundaeswap} from '../connectors/sundaeswap/sundaeswap';
+import {
+  price as sundaeswapPrice,
+ 
+} from '../connectors/sundaeswap/sundaeswap.controllers';
+import { Cardano } from '../chains/cardano/cardano';
 export async function price(req: PriceRequest): Promise<PriceResponse> {
   const chain = await getInitializedChain<
-    Algorand | Ethereumish | Nearish | Tezosish | Osmosis
+    Algorand | Ethereumish | Nearish | Tezosish | Osmosis | Cardano
   >(req.chain, req.network);
   if (chain instanceof Osmosis){
     return chain.controller.price(chain as unknown as Osmosis, req);
   }
 
-  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap =
-    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap>(
+  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap=
+    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap>(
       req.chain,
       req.network,
       req.connector
@@ -115,7 +126,12 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
     return uniswapPrice(<Ethereumish>chain, connector, req);
   } else if (connector instanceof Tinyman) {
     return tinymanPrice(chain as unknown as Algorand, connector, req);
-  } else {
+  } else if(connector instanceof MinSwap){
+    return minswapPrice(<Cardano>chain, connector, req);
+  } else if(connector instanceof Sundaeswap){
+    return sundaeswapPrice(<Cardano>chain, connector, req);
+  }
+  else {
     return refPrice(<Nearish>chain, connector as RefAMMish, req);
   }
 }

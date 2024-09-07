@@ -27,6 +27,7 @@ import {
   UniswapLPish,
   Xdcish,
   Tezosish,
+  Cardanoish,
 } from './common-interfaces';
 import { Traderjoe } from '../connectors/traderjoe/traderjoe';
 import { Sushiswap } from '../connectors/sushiswap/sushiswap';
@@ -46,6 +47,9 @@ import { XRPLCLOB } from '../connectors/xrpl/xrpl';
 import { QuipuSwap } from '../connectors/quipuswap/quipuswap';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
 import { Balancer } from '../connectors/balancer/balancer';
+import { MinSwap } from '../connectors/minswap/minswap';
+import { Sundaeswap } from '../connectors/sundaeswap/sundaeswap';
+import { Cardano } from '../chains/cardano/cardano';
 
 export type ChainUnion =
   | Algorand
@@ -56,7 +60,8 @@ export type ChainUnion =
   | Tezosish
   | XRPLish
   | Kujira
-  | Osmosis;
+  | Osmosis
+  | Cardano;
 
 export type Chain<T> = T extends Algorand
   ? Algorand
@@ -76,6 +81,8 @@ export type Chain<T> = T extends Algorand
                 ? KujiraCLOB
                 : T extends Osmosis
                   ? Osmosis
+                  : T extends Cardano
+                  ? Cardano
                   : never;
 
 export class UnsupportedChainException extends Error {
@@ -141,7 +148,9 @@ export async function getChainInstance(
     connection = XRPL.getInstance(network);
   } else if (chain === 'kujira') {
     connection = Kujira.getInstance(network);
-  } else {
+  } else if (chain === 'cardano') {
+    connection = Cardano.getInstance(network);
+  }else {
     connection = undefined;
   }
 
@@ -159,7 +168,9 @@ export type ConnectorUnion =
   | XRPLCLOB
   | Curve
   | KujiraCLOB
-  | QuipuSwap;
+  | QuipuSwap
+  | MinSwap
+  | Sundaeswap;
 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
@@ -181,6 +192,10 @@ export type Connector<T> = T extends Uniswapish
                   ? KujiraCLOB
                   : T extends QuipuSwap
                     ? QuipuSwap
+                    : T extends MinSwap
+                    ? MinSwap
+                    : T extends Sundaeswap
+                    ? Sundaeswap
                     : never;
 
 export async function getConnector<T>(
@@ -255,7 +270,12 @@ export async function getConnector<T>(
     connectorInstance = QuipuSwap.getInstance(network);
   } else if (chain === 'ethereum' && connector === 'carbonamm') {
     connectorInstance = Carbonamm.getInstance(chain, network);
-  } else {
+  } else if (chain === 'cardano' && connector === 'minSwap') {
+    connectorInstance = MinSwap.getInstance(network);
+  }else if (chain === 'cardano' && connector === 'sundaeswap') {
+    connectorInstance = Sundaeswap.getInstance(network);
+  }
+  else {
     throw new Error('unsupported chain or connector');
   }
 
