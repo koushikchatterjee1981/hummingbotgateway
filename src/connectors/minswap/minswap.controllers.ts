@@ -401,7 +401,7 @@ export async function removeLiquidity(
   
 
   const startTimestamp: number = Date.now();
-  const YOUR_PRIVATE_KEY="";
+ // const YOUR_PRIVATE_KEY="";
   const reqNetwork = req.network;
   //let blockAdapternetwork = "preprod";
   let network: Network = "Preprod";
@@ -457,12 +457,13 @@ export async function removeLiquidity(
 
   console.log('depositTx::::', txComplete);
 
-  const signedTx = await txComplete
+  /*const signedTx = await txComplete
     .signWithPrivateKey(YOUR_PRIVATE_KEY)
     .complete();
   const txId = await signedTx.submit();
   // eslint-disable-next-line no-console
-  console.info(`Transaction submitted successfully: ${txId}`);
+  console.info(`Transaction submitted successfully: ${txId}`);*/
+  const txId = await commitTransaction(txComplete);
 
   return {
     network: req.chain,
@@ -470,11 +471,11 @@ export async function removeLiquidity(
     latency: latency(startTimestamp, Date.now()),
     tokenId: req.tokenId,
     gasPrice: 0.001,
-    gasPriceToken: 'gasPriceToken',
+    gasPriceToken: 'n/a',
     gasLimit: 0.01,
-    gasCost: 'gasCost',
+    gasCost: 'n/a',
     nonce: Math.random(),
-    txHash: 'txHash',
+    txHash: txId,
   };
 }
 
@@ -482,7 +483,7 @@ export async function addLiquidity(
   req: AddLiquidityRequest,
 ): Promise<AddLiquidityResponse> {
   const startTimestamp: number = Date.now();
-  const YOUR_PRIVATE_KEY="";
+  //const YOUR_PRIVATE_KEY="";
   const reqNetwork = req.network;
   //let blockAdapternetwork = "preprod";
   let network: Network = "Preprod";
@@ -536,13 +537,17 @@ export async function addLiquidity(
   const txComplete = await depositTx(network, lucid, blockfrostAdapterInstance, req.address, utxos, req, slippage);
 
   console.log('depositTx::::', txComplete);
-
+/*
   const signedTx = await txComplete
     .signWithPrivateKey(YOUR_PRIVATE_KEY)
     .complete();
   const txId = await signedTx.submit();
   // eslint-disable-next-line no-console
-  console.info(`Transaction submitted successfully: ${txId}`);
+  console.info(`Transaction submitted successfully: ${txId}`);*/
+
+  const transactionId = await commitTransaction(txComplete);
+  
+  //return transactionId;
 
   return {
     network: req.chain,
@@ -553,11 +558,11 @@ export async function addLiquidity(
     fee: req.fee!,
     tokenId: req.tokenId ? req.tokenId : 0,
     gasPrice: 0,
-    gasPriceToken: 'gasPriceToken',
+    gasPriceToken: 'n/a',
     gasLimit: 0,
-    gasCost: 'gasCost',
+    gasCost: 'n/a',
     nonce: Math.random(),
-    txHash: txId,
+    txHash: transactionId,
   };
 }
 export const latency = (startTime: number, endTime: number): number => {
