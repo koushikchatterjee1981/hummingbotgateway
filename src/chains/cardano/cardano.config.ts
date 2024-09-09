@@ -33,7 +33,7 @@ export function getCardanoConfig(
         chainName + '.blockfrostProjectId'
       ),
       defaultPoolId: ConfigManagerV2.getInstance().get(
-        chainName + '.defaultPoolId'
+        chainName + '.defaultPoolId.' + networkName + '.poolId'
       ),
       defaultAddress: ConfigManagerV2.getInstance().get(
         chainName + '.defaultAddress'
