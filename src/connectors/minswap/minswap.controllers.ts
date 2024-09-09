@@ -234,7 +234,7 @@ console.log(cardanoish);
   //console.log("cardano yml found:::", ConfigManagerV2.getInstance().getNamespace("cardano") );
   
  
-  console.log("ttl:::::",initialValue.ttl);
+ // console.log("ttl:::::",initialValue.ttl);
   console.log(returnedPool.poolState);
 
   const [a, b] = await api.getV1PoolPrice({ pool: returnedPool.poolState });
@@ -255,7 +255,7 @@ console.log(cardanoish);
   if(reqType=="BUY"){
     let wantToBuy = req.base;
     let willspend = req.quote;
-    console.log(wantToBuy,"----",willspend);
+    //console.log(wantToBuy,"----",willspend);
     /*
 
     //To BUY 5 base ADA,  calculate amount of quote MIN required
@@ -300,11 +300,11 @@ console.log(cardanoish);
     }else if(tokenReceive=="ADA" && wantToSell=="MIN"){
       conversionFactor = Number(a);
     }
-
-    totalValue = amountToSpend * conversionFactor;
-    expectedAmount = totalValue.toFixed(2).replace('.', '');
-    
   }
+    totalValue = amountToSpend * conversionFactor;
+    expectedAmount = totalValue.toFixed(2).toString();
+    
+  
 
   return {
     network: req.network,
@@ -312,10 +312,10 @@ console.log(cardanoish);
     latency: latency(startTimestamp, Date.now()),
     base: req.base,
     quote: req.quote,
-    amount: new Decimal(req.amount).toFixed(2),
+    amount: new Decimal(req.amount).toFixed(2).toString(),
     rawAmount: expectedAmount,
     expectedAmount: expectedAmount,
-    price: new Decimal(b.toString()).toFixed(2),
+    price: new Decimal(b.toString()).toFixed(2).toString(),
     gasPrice: 0,
     gasPriceToken: "n/a", 
     gasLimit: 0, 
@@ -385,10 +385,10 @@ if(req.isCancelled && req.txnHash){
     latency: latency(startTimestamp, Date.now()),
     base: req.base,
     quote: req.quote,
-    amount: new Decimal(req.amount).toFixed(2),
-    rawAmount: new Decimal(req.amount).toFixed(2),
-    expectedIn: new Decimal(req.amount).toFixed(2),
-    price: new Decimal(req.amount).toFixed(2),
+    amount: new Decimal(req.amount).toFixed(2).toString(),
+    rawAmount: new Decimal(req.amount).toFixed(2).toString(),
+    expectedIn: new Decimal(req.amount).toFixed(2).toString(),
+    price: new Decimal(req.amount).toFixed(2).toString(),
     gasPrice: 0.0,
     gasPriceToken: 'n/a',
     gasLimit: 0,
@@ -405,7 +405,7 @@ export async function removeLiquidity(
 
   const startTimestamp: number = Date.now();
  // const YOUR_PRIVATE_KEY="";
-  const reqNetwork = req.network;
+  const reqNetwork:any = req.network;
   //let blockAdapternetwork = "preprod";
   let network: Network = "Preprod";
   let networkId=0;
@@ -432,19 +432,11 @@ export async function removeLiquidity(
     networkId: networkId,//NetworkId.TESTNET,
     blockFrost: new BlockFrostAPI({
       projectId: blockfrostProjectId,
-      network: "preprod",
+      network: reqNetwork,
     }),
   });
 
-  if(network=="Mainnet"){
-    blockfrostAdapterInstance = new BlockfrostAdapter({
-      networkId: networkId,//NetworkId.TESTNET,
-      blockFrost: new BlockFrostAPI({
-        projectId: blockfrostProjectId,
-        network: "mainnet",
-      }),
-    });
-  }
+  
   let seedphrase = "";
   if(req.seedPhrase){
     seedphrase=req.seedPhrase;
@@ -457,7 +449,7 @@ export async function removeLiquidity(
     seedphrase
   );
 
-  console.log('lucid : ', lucid);
+  //console.log('lucid : ', lucid);
 
   const utxos = await lucid.utxosAt(req.address);
 
@@ -467,7 +459,7 @@ export async function removeLiquidity(
 
   const txComplete = await withdrawTx(network, lucid, blockfrostAdapterInstance, req.address, utxos, req, slippage);
 
-  console.log('depositTx::::', txComplete);
+  //console.log('depositTx::::', txComplete);
 
   /*const signedTx = await txComplete
     .signWithPrivateKey(YOUR_PRIVATE_KEY)
@@ -482,9 +474,9 @@ export async function removeLiquidity(
     timestamp: startTimestamp,
     latency: latency(startTimestamp, Date.now()),
     tokenId: req.tokenId,
-    gasPrice: 0.001,
+    gasPrice: 0.0,
     gasPriceToken: 'n/a',
-    gasLimit: 0.01,
+    gasLimit: 0.0,
     gasCost: 'n/a',
     nonce: Math.random(),
     txHash: txId,
@@ -540,13 +532,13 @@ export async function addLiquidity(
     seedphrase
   );
 
-  console.log('lucid : ', lucid);
+  //console.log('lucid : ', lucid);
 
   const utxos = await lucid.utxosAt(req.address);
 
   const txComplete = await depositTx(network, lucid, blockfrostAdapterInstance, req.address, utxos, req, slippage);
 
-  console.log('depositTx::::', txComplete);
+  //console.log('depositTx::::', txComplete);
 /*
   const signedTx = await txComplete
     .signWithPrivateKey(YOUR_PRIVATE_KEY)
