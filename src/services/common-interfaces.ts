@@ -826,7 +826,6 @@ export interface FullTransferResponse {
 
 export interface Cardanoish extends Cardano {
   allowedSlippage: string;
-  //gasLimitEstimate: number;
   ttl: string;
   blockfrostProjectId:string;
   defaultPoolId:string;
