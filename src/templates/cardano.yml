@@ -13,7 +13,7 @@ defaultPoolId:
     preprod: 
        poolId : 3bb0079303c57812462dec9de8fb867cef8fd3768de7f12c77f6f0dd80381d0d
 
-defaultAddress: addr1qxw0m0mcyvpnkq3atvxm5l9w3uzwt7pqh0djakcqypknt5xum2ypkuc5snqju55m8mkjywxlwrt2v5e6yvcsymjxuxxs5d4gqc
+defaultAddress: testaddresstouse
 
 
 # this is the blockfrost project id we need to connect to the Minswap DEX
