@@ -135,7 +135,7 @@ configurations:
   $namespace balancer:
     configurationPath: balancer.yml
     schemaPath: cronos-connector-schema.json
-  
+
   $namespace cardano:
     configurationPath: cardano.yml
-    schemaPath: cronos-connector-schema.json
+    schemaPath: cardano-schema.json
