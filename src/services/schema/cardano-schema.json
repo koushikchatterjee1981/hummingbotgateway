@@ -13,7 +13,7 @@
           "properties": {
             "poolId": { "type": "string" }
           },
-          "required": ["apiurl"],
+          "required": ["poolId"],
           "additionalProperties": false
         }
       },
