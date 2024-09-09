@@ -1,22 +1,29 @@
-import { getCardanoConfig,NetworkConfig } from "./cardano.config";
-import { Cardanoish } from "../../services/common-interfaces";
+import { getCardanoConfig } from "./cardano.config";
+//import { Cardanoish } from "../../services/common-interfaces";
 
 export class Cardano {
     private static _instances: { [name: string]: Cardano };
-    public network: NetworkConfig;  
-    public allowedSlippage: string;
-    public gasLimitEstimate: number;
-    public ttl: number; 
-    //public chain : string
-    public config:any;
+    // public network: NetworkConfig;  
+     public allowedSlippage?: string;
+     public blockfrostProjectId : string;
+     //public gasLimitEstimate: number;
+     public ttl?: string; 
+     
     private _ready: boolean = false;
+    public apiURL:any;
+    public defaultPoolId:string;
     
     private constructor(network: string) {
-        this.config = getCardanoConfig('cardano', network);
-        this.ttl = this.config.ttl
-        this.gasLimitEstimate = this.config.gasLimitEstimate
-        this.allowedSlippage = this.config.allowedSlippage
-        this.network = this.config.network
+        const config = getCardanoConfig('cardano', network);
+         this.ttl = config.ttl;
+         this.blockfrostProjectId = config.blockfrostProjectId;
+         //config.
+         //this.gasLimitEstimate = config.gasLimitEstimate;
+         this.allowedSlippage = config.allowedSlippage;
+        // this.network = config.network;
+        this.apiURL=config.network.apiurl;
+        this.defaultPoolId = config.defaultPoolId;
+         
     }
     public static getInstance(network: string): Cardano {
         if (Cardano._instances === undefined) {
@@ -32,12 +39,15 @@ export class Cardano {
       public static getConnectedInstances(): { [name: string]: Cardano } {
         return Cardano._instances;
       }
-      public async init() {
-        if (!this.ready()){
-            this._ready = true
-        }
-      }
+
+
       public ready(): boolean {
         return this._ready;
+      }
+
+      public async init(): Promise<void> {
+        
+        this._ready = true;
+        return;
       }
 }

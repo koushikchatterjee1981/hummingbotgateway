@@ -27,7 +27,7 @@ import {
   UniswapLPish,
   Xdcish,
   Tezosish,
-  Cardanoish,
+ // Cardanoish,
 } from './common-interfaces';
 import { Traderjoe } from '../connectors/traderjoe/traderjoe';
 import { Sushiswap } from '../connectors/sushiswap/sushiswap';
@@ -270,7 +270,7 @@ export async function getConnector<T>(
     connectorInstance = QuipuSwap.getInstance(network);
   } else if (chain === 'ethereum' && connector === 'carbonamm') {
     connectorInstance = Carbonamm.getInstance(chain, network);
-  } else if (chain === 'cardano' && connector === 'minSwap') {
+  } else if (chain === 'cardano' && connector === 'minswap') {
     connectorInstance = MinSwap.getInstance(network);
   }else if (chain === 'cardano' && connector === 'sundaeswap') {
     connectorInstance = Sundaeswap.getInstance(network);

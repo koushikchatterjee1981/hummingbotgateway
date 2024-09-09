@@ -116,6 +116,7 @@ import { CurveTrade } from '../connectors/curve/curve';
 import { SerializableExtendedPool as CosmosSerializableExtendedPool } from '../chains/osmosis/osmosis.types';
 import { CarbonTrade } from '../connectors/carbon/carbonAMM';
 import { BalancerTrade } from '../connectors/balancer/balancer';
+import { Cardano } from "../chains/cardano/cardano";
 
 // TODO Check the possibility to have clob/solana/serum equivalents here
 //  Check this link https://hummingbot.org/developers/gateway/building-gateway-connectors/#5-add-sdk-classes-to-uniswapish-interface
@@ -821,4 +822,13 @@ export interface FullTransferResponse {
   gasUsed: string;
   gasWanted: string;
   txHash: string;
+}
+
+export interface Cardanoish extends Cardano {
+  allowedSlippage: string;
+  //gasLimitEstimate: number;
+  ttl: string;
+  blockfrostProjectId:string;
+  defaultPoolId:string;
+  defaultAddress:string;
 }

@@ -1,14 +1,16 @@
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 export interface NetworkConfig {
   name: string;
-  routerAddress:string;
+  apiurl:string;
 }
 
 interface Config {
   network: NetworkConfig;  
   allowedSlippage: string;
-  gasLimitEstimate: number;
-  ttl: number;
+  blockfrostProjectId: string;
+  ttl: string;
+  defaultPoolId:string;
+  defaultAddress:string;
 }
 
 export function getCardanoConfig(
@@ -19,16 +21,22 @@ export function getCardanoConfig(
   return {
     network: {
       name: network,
-      routerAddress: ConfigManagerV2.getInstance().get(
-        chainName + '.contractAddresses.' + networkName + '.routerAddress'
+      apiurl: ConfigManagerV2.getInstance().get(
+        chainName + '.contractAddresses.' + networkName + '.apiurl'
       )
     },
     
       allowedSlippage: ConfigManagerV2.getInstance().get(
         chainName + '.allowedSlippage'
       ),
-      gasLimitEstimate: ConfigManagerV2.getInstance().get(
-        chainName + '.gasLimitEstimate'
+      blockfrostProjectId: ConfigManagerV2.getInstance().get(
+        chainName + '.blockfrostProjectId'
+      ),
+      defaultPoolId: ConfigManagerV2.getInstance().get(
+        chainName + '.defaultPoolId'
+      ),
+      defaultAddress: ConfigManagerV2.getInstance().get(
+        chainName + '.defaultAddress'
       ),
       ttl: ConfigManagerV2.getInstance().get(
         chainName + '.ttl'

@@ -1,11 +1,19 @@
 # how much the execution price is allowed to move unfavorably from the trade execution price. It uses a rational number for precision.
 allowedSlippage: '1/100'
 
-# For Cardano this will be trated as transaction fee estimate
-gasLimitEstimate: 300000
+# For Cardano this will be used to connect to the network via blockfrost API
+blockfrostProjectId: 'preprodfGRaDPrVu6DhhHSNm5w8kzIkQghi2RYR'
 
 # how long a trade is valid in seconds. 
 ttl: 300
+
+defaultPoolId: 
+    mainnet: 
+       poolId : 6aa2153e1ae896a95539c9d62f76cedcdabdcdf144e564b8955f609d660cf6a2
+    preprod: 
+       poolId : 3bb0079303c57812462dec9de8fb867cef8fd3768de7f12c77f6f0dd80381d0d
+
+defaultAddress: addr1qxw0m0mcyvpnkq3atvxm5l9w3uzwt7pqh0djakcqypknt5xum2ypkuc5snqju55m8mkjywxlwrt2v5e6yvcsymjxuxxs5d4gqc
 
 
 # this is the blockfrost project id we need to connect to the Minswap DEX
@@ -13,6 +21,6 @@ ttl: 300
 
 contractAddresses:
   mainnet:
-      routerAddress: 'https://cardano-mainnet.blockfrost.io/api/v0'
+      apiurl: 'https://cardano-mainnet.blockfrost.io/api/v0'
   preprod:
-      routerAddress: 'https://cardano-preprod.blockfrost.io/api/v0'
+      apiurl: 'https://cardano-preprod.blockfrost.io/api/v0'
