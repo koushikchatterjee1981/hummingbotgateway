@@ -13,7 +13,9 @@ Currently the MIN-ADA token pair is supported for transaction over Cardano, othe
         __Steps__:
         
         Babel is used to convert the compatible CJS package. In package.json we have added a Yarn script to convert.
-        
+         Script:
+        "babelcompileMinswap": "babel node_modules/@minswap/sdk/build --out-dir node_modules/@minswap/sdk/build/cjs"
+        command : yarn babelcompileMinswap
         After conversion modify the package.json under @minswap/sdk as follows,
   
             remove : "type": "module"
@@ -27,12 +29,7 @@ Currently the MIN-ADA token pair is supported for transaction over Cardano, othe
             to : "exports": {
                 ".": "./build/cjs/index.es.js"
             }
-  
-  
-        Script:
-        "babelcompileMinswap": "babel node_modules/@minswap/sdk/build --out-dir node_modules/@minswap/sdk/build/cjs"
-
-        The converted lucid-cardano CJS package is available in lib folder.
+  The converted lucid-cardano CJS package is available in lib folder.
         Just copy lucid-cardano folder from lib folder and replace it under node_modules folder.
 # Functional use
 
