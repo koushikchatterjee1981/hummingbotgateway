@@ -132,4 +132,5 @@ You can run the prettifier before committing with:
 ```bash
 yarn run prettier
 ```
-
+## Connector documentation
+Minswap implementation documentation has been added under the /doc folder
