@@ -6,6 +6,8 @@ Minswap connectors are using blockfrost library as a middle layer to connect to 
 
 Currently the MIN-ADA token pair is supported for transaction over Cardano, other token support would be added soon
 
+to effectively use the connector user need to have a blockfrost account and a project created on the required network(preprod/mainnet) and add the project id in cardano.yml file under templates folder
+
     ** Handling CJS/ESM library dependency**
 
         As the hummingbot gateway project is CJS package compatible but lucid-cardano and minswap/sdk are ESM package. So in order to make the project build compatible to CJS the lucid-cardano and minswap/sdk libraries were converted to CJS package.
