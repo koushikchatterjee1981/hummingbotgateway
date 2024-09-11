@@ -745,8 +745,10 @@ async function withdrawTx(
   );
 
   const lpAsset = Asset.fromString(poolState.assetLP);
+
+  const withAmt:any = req.decreasePercent;
   const withdrawalAmount =
-    BigInt(1); //this is the amount you want to withdraw---
+    BigInt(withAmt); //this is the amount you want to withdraw---
 
   const { amountAReceive, amountBReceive } = calculateWithdraw({
     withdrawalLPAmount: withdrawalAmount,
