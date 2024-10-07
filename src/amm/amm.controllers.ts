@@ -96,11 +96,6 @@ import {
   addLiquidity as minswapAddLiquidity
  
 } from '../connectors/minswap/minswap.controllers';
-import {Sundaeswap} from '../connectors/sundaeswap/sundaeswap';
-import {
-  price as sundaeswapPrice,
-  trade as sundaeswapTrade,
-} from '../connectors/sundaeswap/sundaeswap.controllers';
 
 import { Cardano } from '../chains/cardano/cardano';
 
@@ -115,8 +110,8 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
 
   
 
-  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap =
-    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap>(
+  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap  =
+    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap  >(
       req.chain,
       req.network,
       req.connector
@@ -134,9 +129,7 @@ export async function price(req: PriceRequest): Promise<PriceResponse> {
   } else if (connector instanceof Tinyman) {
     return tinymanPrice(chain as unknown as Algorand, connector, req);
   } else if(connector instanceof MinSwap){
-    return minswapPrice(<Cardano>chain, connector, req);
-  } else if(connector instanceof Sundaeswap){
-    return sundaeswapPrice( connector, req);
+    return minswapPrice(<Cardano>chain, connector, req);  
   
   } else {
     return refPrice(<Nearish>chain, connector as RefAMMish, req);
@@ -151,8 +144,8 @@ export async function trade(req: TradeRequest): Promise<TradeResponse> {
     return chain.controller.trade(chain as unknown as Osmosis, req);
   }
 
-  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap =
-    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap | Sundaeswap>(
+  const connector: Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap  =
+    await getConnector<Uniswapish | RefAMMish | Tinyman | Plenty | QuipuSwap | MinSwap  >(
       req.chain,
       req.network,
       req.connector
@@ -171,9 +164,7 @@ export async function trade(req: TradeRequest): Promise<TradeResponse> {
     return tinymanTrade(chain as unknown as Algorand, connector, req);
   } else if(connector instanceof MinSwap){
     return minswapTrade(<Cardano>chain, connector, req);
-  } else if(connector instanceof Sundaeswap){
-    return sundaeswapTrade( connector, req);
-  
+ 
   } else {
     return refTrade(<Nearish>chain, connector as RefAMMish, req);
   }

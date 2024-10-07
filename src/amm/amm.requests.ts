@@ -149,6 +149,7 @@ export interface RemoveLiquidityRequest extends CollectEarnedFeesRequest {
   decreasePercent?: number;
   allowedSlippage?: string;
   seedPhrase?: string;//for cardano
+  poolId? : string;
 }
 
 export interface RemoveLiquidityResponse {
@@ -165,6 +166,7 @@ export interface RemoveLiquidityResponse {
   gasWanted?: string;
   balances?: CoinAndSymbol[];
   isCollectFees?: boolean;
+  
 }
 
 export interface PositionRequest extends NetworkSelectionRequest {

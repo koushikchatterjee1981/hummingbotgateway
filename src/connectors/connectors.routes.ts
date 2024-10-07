@@ -190,6 +190,16 @@ export namespace ConnectorsRoutes {
             chain_type: BalancerConfig.config.chainType,
             available_networks: BalancerConfig.config.availableNetworks,
           },
+          {
+            name: 'minswap',
+            trading_type: ['AMM'],
+            chain_type: 'cardano',
+            available_networks: [
+              {
+                chain: 'cardano',
+                networks: ['mainnet', 'preprod']
+              }]
+          }
         ],
       });
     })
