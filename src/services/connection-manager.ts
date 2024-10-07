@@ -48,7 +48,7 @@ import { QuipuSwap } from '../connectors/quipuswap/quipuswap';
 import { Carbonamm } from '../connectors/carbon/carbonAMM';
 import { Balancer } from '../connectors/balancer/balancer';
 import { MinSwap } from '../connectors/minswap/minswap';
-import { Sundaeswap } from '../connectors/sundaeswap/sundaeswap';
+//import { Sundaeswap } from '../connectors/sundaeswap/sundaeswap';
 import { Cardano } from '../chains/cardano/cardano';
 
 export type ChainUnion =
@@ -169,8 +169,7 @@ export type ConnectorUnion =
   | Curve
   | KujiraCLOB
   | QuipuSwap
-  | MinSwap
-  | Sundaeswap;
+  | MinSwap;
 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
@@ -194,8 +193,6 @@ export type Connector<T> = T extends Uniswapish
                     ? QuipuSwap
                     : T extends MinSwap
                     ? MinSwap
-                    : T extends Sundaeswap
-                    ? Sundaeswap
                     : never;
 
 export async function getConnector<T>(
@@ -272,8 +269,6 @@ export async function getConnector<T>(
     connectorInstance = Carbonamm.getInstance(chain, network);
   } else if (chain === 'cardano' && connector === 'minswap') {
     connectorInstance = MinSwap.getInstance(network);
-  }else if (chain === 'cardano' && connector === 'sundaeswap') {
-    connectorInstance = Sundaeswap.getInstance(network);
   }
   else {
     throw new Error('unsupported chain or connector');
