@@ -4,7 +4,9 @@ Minswap is a multi-pool decentralized exchange operating on the Cardano Blockcha
 
 Minswap connectors are using blockfrost library as a middle layer to connect to Cardano along with lucid-cardano library framework
 
-Currently the MIN-ADA token pair is supported for transaction over Cardano, other token support would be added soon
+Currently the MIN-ADA token pair is supported for transaction over Cardano with V1 contracts, other token support would be added soon along with V2 contract support
+
+to effectively use the connector user need to have a blockfrost account and a project created on the required network(preprod/mainnet) and add the project id in cardano.yml file under templates folder
 
     ** Handling CJS/ESM library dependency**
 
