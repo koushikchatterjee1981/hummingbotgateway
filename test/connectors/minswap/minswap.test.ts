@@ -127,8 +127,8 @@ describe('to remove liquidity from the identified MIN/ADA pool', () => {
       chain: 'cardano',
       network: 'preprod', // the target network of the chain (e.g. preprod)
       connector: 'minswap', //the target connector
-      tokenId:
-        5, //poolId here
+      poolId: 'poolId', //poolId here
+      tokenId : 5,
       address: 'walletaddress',
       decreasePercent: 5, //for cardano need to send the waithdrawal amount here
       seedPhrase: 'walletseedphrase', //to connect to the cardano user wallet
