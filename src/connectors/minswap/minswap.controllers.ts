@@ -114,7 +114,7 @@ async function initializeTrade(
   const blockfrostProjectId = cardanoish.blockfrostProjectId;
 
   const ttl: any = cardanoish.ttl;
-  const slippage: any = cardanoish.allowedSlippage;
+  const slippage: any = 0;//cardanoish.allowedSlippage;
   const blockfrostUrl = cardanoish.apiURL;
 
   let poolId = ConfigManagerV2.getInstance().get(
@@ -532,7 +532,7 @@ async function swapExactInTx(
   BUY : acquire particular base by selling quote  calculateSwapExactOut
 SELL : sell particular base to acquire quote  calculateSwapExactIn
 */
-  const swapAmountADA = BigInt(req.amount);
+  const swapAmountADA = BigInt(req.amount)*BigInt(1000000);
 
   const { amountOut } = calculateSwapExactIn({
     amountIn: swapAmountADA, //exact amount of input tokens that the user wants to swap
@@ -676,7 +676,7 @@ async function swapExactOutTx(
   /*  swap MIN to get ADA base: ADA , quote : MIN
 
 */
-  const exactAmountOutADA = BigInt(req.amount);
+  const exactAmountOutADA = BigInt(req.amount) * BigInt(1000000);
 
   const { amountIn } = calculateSwapExactOut({
     exactAmountOut: exactAmountOutADA,
