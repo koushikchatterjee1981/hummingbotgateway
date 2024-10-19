@@ -15,7 +15,7 @@
     "dev": "nodemon src/index.ts",
     "dev:debug": "NODE_ENV=dev DEBUG=* nodemon src/index.ts",
     "start": "/bin/bash ./startup.sh",
-    "copy-files": "copyfiles -a src/**/schema/*.json src/templates/*.yml src/templates/lists/*.json test/services/data/**/*.* dist",
+     "copy-files": "copyfiles -a 'src/**/schema/*.json' 'src/templates/*.yml' 'src/templates/lists/*.json' 'test/services/data/**/*.*' dist",
     "test": "jest --verbose",
     "test:debug": "node --inspect node_modules/.bin/jest --watch --runInBand",
     "test:unit": "NODE_OPTIONS=--max_old_space_size=10240 jest --runInBand --verbose ./test/",
@@ -23,7 +23,7 @@
     "test:scripts": "jest -i --verbose ./test-scripts/*.test.ts",
     "copyYML": "copy 'src/templates/*.yml' 'dist/src/templates'",
     "checklint": "eslint --ext .ts src",
-    "copyLib": "copyfiles -u 1 -a lib/**/*  node_modules/",
+    "copyLib": "copyfiles -u 1 -a 'lib/**/*'  node_modules/",
     "babelcompileMinswap": "babel node_modules/@minswap/sdk/build --out-dir node_modules/@minswap/sdk/build/cjs",
     "babelcompileCardano": "babel node_modules/lucid-cardano/esm --out-dir node_modules/lucid-cardano/cjs",
     "babelcompileCardano1": "babel node_modules/lucid-cardano/ws --out-dir node_modules/lucid-cardano/wscjs"
